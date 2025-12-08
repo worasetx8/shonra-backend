@@ -37,19 +37,43 @@ RUN echo "Building with VITE_API_URL=${VITE_API_URL}" && \
     echo "GEMINI_API_KEY is ${GEMINI_API_KEY:-NOT SET}"
 
 # Build the application with better error handling
-RUN set -e && \
-    echo "Starting build process..." && \
+# Step 1: Check environment and files
+RUN echo "=== Build Environment Check ===" && \
     echo "Current directory: $(pwd)" && \
+    echo "Node version: $(node --version)" && \
+    echo "NPM version: $(npm --version)" && \
     echo "Files in /app:" && \
     ls -la /app/ | head -20 && \
-    echo "Running npm run build..." && \
-    npm run build 2>&1 && \
-    echo "Build command completed. Checking for dist folder..." && \
+    echo "Environment variables:" && \
+    env | grep -E "(VITE|SERVER|GEMINI)" || echo "No VITE/SERVER/GEMINI vars found" && \
+    echo "Checking TypeScript config..." && \
+    test -f tsconfig.json && echo "✅ tsconfig.json exists" || echo "⚠️ tsconfig.json not found" && \
+    echo "Checking vite config..." && \
+    test -f vite.config.ts && echo "✅ vite.config.ts exists" || echo "⚠️ vite.config.ts not found"
+
+# Step 2: Check TypeScript compilation (without emitting files)
+RUN echo "=== TypeScript Check ===" && \
+    npx tsc --noEmit 2>&1 | head -50 || echo "⚠️ TypeScript check completed (warnings may exist)"
+
+# Step 3: Run build (separate step to see errors clearly)
+RUN echo "=== Starting Build ===" && \
+    npm run build 2>&1 | tee /tmp/build.log || ( \
+        echo "❌ Build failed! Showing last 100 lines of build log:" && \
+        tail -100 /tmp/build.log && \
+        echo "Full build log saved to /tmp/build.log" && \
+        exit 1 \
+    )
+
+# Step 4: Verify dist folder exists
+RUN echo "=== Verifying Build Output ===" && \
     if [ ! -d "/app/dist" ]; then \
         echo "❌ ERROR: dist folder not found after build!" && \
         echo "Contents of /app:" && \
         ls -la /app/ && \
-        echo "Checking for build errors..." && \
+        echo "Checking package.json build script:" && \
+        cat package.json | grep -A 2 '"build"' && \
+        echo "Build log:" && \
+        tail -50 /tmp/build.log || echo "No build log found" && \
         exit 1; \
     fi && \
     echo "✅ dist folder exists!" && \
