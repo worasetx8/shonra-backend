@@ -37,14 +37,31 @@ RUN echo "Building with VITE_API_URL=${VITE_API_URL}" && \
     echo "GEMINI_API_KEY is ${GEMINI_API_KEY:-NOT SET}"
 
 # Build the application with better error handling
-RUN echo "Starting build process..." && \
-    npm run build 2>&1 | tee /tmp/build.log || \
-    (echo "❌ Build failed! Error log:" && cat /tmp/build.log && exit 1)
+RUN set -e && \
+    echo "Starting build process..." && \
+    echo "Current directory: $(pwd)" && \
+    echo "Files in /app:" && \
+    ls -la /app/ | head -20 && \
+    echo "Running npm run build..." && \
+    npm run build 2>&1 && \
+    echo "Build command completed. Checking for dist folder..." && \
+    if [ ! -d "/app/dist" ]; then \
+        echo "❌ ERROR: dist folder not found after build!" && \
+        echo "Contents of /app:" && \
+        ls -la /app/ && \
+        echo "Checking for build errors..." && \
+        exit 1; \
+    fi && \
+    echo "✅ dist folder exists!" && \
+    echo "Contents of dist:" && \
+    ls -la /app/dist/ && \
+    echo "Build verification complete!"
 
 # Stage 2: Production server with nginx
 FROM nginx:alpine
 
 # Copy built files from builder stage
+# Verify the source exists before copying
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy nginx configuration (if exists, otherwise use default)
