@@ -27,14 +27,28 @@ RUN echo "=== Verifying Source Files ===" && \
     test -f index.html && echo "✅ index.html" || echo "❌ index.html MISSING" && \
     echo "Environment: VITE_API_URL=${VITE_API_URL:-NOT SET}"
 
-# Build the application
+# Build the application (show all output)
 RUN echo "=== Building Application ===" && \
-    npm run build && \
-    echo "=== Build Complete ===" && \
-    ls -la /app/dist/ || echo "❌ dist folder not found"
+    npm run build 2>&1 || ( \
+        echo "" && \
+        echo "❌ Build failed! Exit code: $?" && \
+        echo "Check the build output above for error messages." && \
+        exit 1 \
+    )
+
+# Verify dist folder was created
+RUN if [ ! -d "/app/dist" ]; then \
+        echo "❌ ERROR: dist folder not found after build!" && \
+        echo "This means the build step failed." && \
+        exit 1; \
+    fi && \
+    echo "✅ dist folder exists!" && \
+    ls -la /app/dist/
 
 # Production Stage
 FROM nginx:alpine
+
+# Copy built files from builder stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Nginx configuration for SPA
