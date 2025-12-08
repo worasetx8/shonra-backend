@@ -57,22 +57,25 @@ RUN echo "=== TypeScript Check ===" && \
 
 # Step 3: Run build (separate step to see errors clearly)
 RUN echo "=== Starting Build ===" && \
-    set -o pipefail && \
-    npm run build 2>&1 | tee /tmp/build.log || { \
-        BUILD_EXIT_CODE=$?; \
+    npm run build > /tmp/build.log 2>&1; \
+    BUILD_EXIT_CODE=$?; \
+    if [ $BUILD_EXIT_CODE -ne 0 ]; then \
         echo ""; \
         echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"; \
         echo ""; \
-        echo "=== Last 150 lines of build log ==="; \
-        tail -150 /tmp/build.log; \
+        echo "=== Full Build Log ==="; \
+        cat /tmp/build.log; \
         echo ""; \
-        echo "=== Full build log saved to /tmp/build.log ==="; \
-        echo "=== Checking for common errors ==="; \
-        grep -i "error" /tmp/build.log | tail -20 || echo "No 'error' found in log"; \
+        echo "=== Checking for errors ==="; \
+        grep -i "error" /tmp/build.log | head -30 || echo "No 'error' keyword found"; \
         echo ""; \
+        echo "=== Checking for warnings ==="; \
+        grep -i "warn" /tmp/build.log | head -20 || echo "No warnings found"; \
         exit $BUILD_EXIT_CODE; \
-    } && \
-    echo "✅ Build command completed successfully"
+    fi && \
+    echo "✅ Build command completed successfully" && \
+    echo "Build output summary:" && \
+    tail -20 /tmp/build.log
 
 # Step 4: Verify dist folder exists
 RUN echo "=== Verifying Build Output ===" && \
