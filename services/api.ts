@@ -1,11 +1,20 @@
 // API Configuration
 // In development, use relative path (Vite proxy handles it)
 // In production, use full API URL from environment variable
-const API_BASE_URL = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL}/api`
-  : import.meta.env.SERVER_URL
-  ? `${import.meta.env.SERVER_URL}/api`
-  : "/api";
+const getApiBaseUrl = (): string => {
+  const viteApiUrl = import.meta.env.VITE_API_URL;
+  const serverUrl = import.meta.env.SERVER_URL;
+  
+  if (viteApiUrl) {
+    return `${viteApiUrl}/api`;
+  }
+  if (serverUrl) {
+    return `${serverUrl}/api`;
+  }
+  return "/api";
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // API Service class
 class ApiService {
