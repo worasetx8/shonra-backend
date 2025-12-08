@@ -55,28 +55,23 @@ RUN echo "=== Build Environment Check ===" && \
 RUN echo "=== TypeScript Check ===" && \
     npx tsc --noEmit 2>&1 | head -50 || echo "⚠️ TypeScript check completed (warnings may exist)"
 
-# Step 3: Verify build script exists
-RUN echo "=== Verifying Build Script ===" && \
+# Step 3: Verify build script and dependencies
+RUN echo "=== Verifying Build Setup ===" && \
     echo "Package.json build script:" && \
     cat package.json | grep -A 2 '"build"' && \
-    echo "Vite executable:" && \
-    which vite || npm list vite || echo "Vite not found in PATH"
+    echo "" && \
+    echo "Checking Vite installation:" && \
+    npm list vite 2>&1 | head -5 || echo "Vite check failed" && \
+    echo "" && \
+    echo "Checking if vite.config.ts exists:" && \
+    test -f vite.config.ts && echo "✅ vite.config.ts exists" || echo "❌ vite.config.ts NOT FOUND" && \
+    echo "" && \
+    echo "Checking if tsconfig.json exists:" && \
+    test -f tsconfig.json && echo "✅ tsconfig.json exists" || echo "❌ tsconfig.json NOT FOUND"
 
-# Step 4: Run build (show output directly for better debugging)
+# Step 4: Run build - show all output directly
 RUN echo "=== Starting Build ===" && \
-    echo "Running: npm run build" && \
-    npm run build || ( \
-        echo "" && \
-        echo "❌ Build failed! Checking for common issues..." && \
-        echo "Node version: $(node --version)" && \
-        echo "NPM version: $(npm --version)" && \
-        echo "Current directory: $(pwd)" && \
-        echo "Files in /app:" && \
-        ls -la /app/ | head -30 && \
-        echo "Checking if dist folder was created:" && \
-        ls -la /app/dist 2>&1 || echo "dist folder does not exist" && \
-        exit 1 \
-    )
+    npm run build
 
 # Step 4: Verify dist folder exists
 RUN echo "=== Verifying Build Output ===" && \
