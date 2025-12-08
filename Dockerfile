@@ -44,43 +44,24 @@ RUN echo "=== Build Environment ===" && \
     echo "SERVER_URL: ${SERVER_URL:-NOT SET}" && \
     echo "" && \
     echo "=== Verifying Source Files ===" && \
-    test -f vite.config.ts && echo "✅ vite.config.ts" || echo "❌ vite.config.ts MISSING" && \
-    test -f tsconfig.json && echo "✅ tsconfig.json" || echo "❌ tsconfig.json MISSING" && \
-    test -f package.json && echo "✅ package.json" || echo "❌ package.json MISSING" && \
-    test -f index.html && echo "✅ index.html" || echo "❌ index.html MISSING" && \
+    test -f vite.config.ts && echo "✅ vite.config.ts" || (echo "❌ vite.config.ts MISSING" && exit 1) && \
+    test -f tsconfig.json && echo "✅ tsconfig.json" || (echo "❌ tsconfig.json MISSING" && exit 1) && \
+    test -f package.json && echo "✅ package.json" || (echo "❌ package.json MISSING" && exit 1) && \
+    test -f index.html && echo "✅ index.html" || (echo "❌ index.html MISSING" && exit 1) && \
     echo "" && \
     echo "=== Running Build ===" && \
-    npm run build && \
-    echo "" && \
-    echo "=== Build Completed ===" && \
-    ls -la /app/dist/ || echo "❌ dist folder not found"
+    npm run build
 
-# Step 4: Verify dist folder exists
+# Verify dist folder was created (build should have created it)
 RUN echo "=== Verifying Build Output ===" && \
     if [ ! -d "/app/dist" ]; then \
         echo "❌ ERROR: dist folder not found after build!" && \
-        echo "Contents of /app:" && \
-        ls -la /app/ && \
-        echo "Checking package.json build script:" && \
-        cat package.json | grep -A 2 '"build"' && \
-        echo "" && \
-        echo "Last 100 lines of build log:" && \
-        if [ -f /tmp/build.log ]; then \
-            tail -100 /tmp/build.log; \
-        else \
-            echo "⚠️ Build log file not found"; \
-        fi && \
-        echo "" && \
-        echo "Checking for common build issues..." && \
-        echo "Vite config exists: $([ -f vite.config.ts ] && echo 'YES' || echo 'NO')" && \
-        echo "TypeScript config exists: $([ -f tsconfig.json ] && echo 'YES' || echo 'NO')" && \
-        echo "Node modules exists: $([ -d node_modules ] && echo 'YES' || echo 'NO')" && \
+        echo "This means the build step failed. Check the build output above." && \
         exit 1; \
     fi && \
     echo "✅ dist folder exists!" && \
-    echo "Contents of dist:" && \
-    ls -la /app/dist/ && \
-    echo "Build verification complete!"
+    echo "Contents:" && \
+    ls -la /app/dist/
 
 # Stage 2: Production server with nginx
 FROM nginx:alpine
