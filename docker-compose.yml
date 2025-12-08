@@ -24,6 +24,6 @@ services:
           cpus: '0.1'
           memory: 128M
     ports:
-      - '5173:5173'
-    # Note: In production, use nginx reverse proxy instead of exposing port directly
+      - '5173:80'
+    # Note: Port 80 is nginx serving the built static files
 
