@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # Backend Admin Panel - React + Vite (Admin UI)
+  backend-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:3002}
+    container_name: shonra-backend-admin
+    env_file:
+      - stack.env
+    restart: always
+    # Resource limits - Optimized for 2 cores, 8GB RAM
+    # For 4+ cores: Increase to 0.5 CPU, 512MB RAM
+    # For 8+ cores: Increase to 1 CPU, 1GB RAM
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    ports:
+      - '5173:5173'
+    # Note: In production, use nginx reverse proxy instead of exposing port directly
+
