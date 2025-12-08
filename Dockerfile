@@ -57,15 +57,21 @@ RUN echo "=== TypeScript Check ===" && \
 
 # Step 3: Run build (separate step to see errors clearly)
 RUN echo "=== Starting Build ===" && \
-    npm run build 2>&1 | tee /tmp/build.log; \
-    BUILD_EXIT_CODE=${PIPESTATUS[0]}; \
-    if [ $BUILD_EXIT_CODE -ne 0 ]; then \
-        echo "❌ Build failed with exit code: $BUILD_EXIT_CODE" && \
-        echo "Showing last 100 lines of build log:" && \
-        tail -100 /tmp/build.log && \
-        echo "Full build log saved to /tmp/build.log" && \
+    set -o pipefail && \
+    npm run build 2>&1 | tee /tmp/build.log || { \
+        BUILD_EXIT_CODE=$?; \
+        echo ""; \
+        echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"; \
+        echo ""; \
+        echo "=== Last 150 lines of build log ==="; \
+        tail -150 /tmp/build.log; \
+        echo ""; \
+        echo "=== Full build log saved to /tmp/build.log ==="; \
+        echo "=== Checking for common errors ==="; \
+        grep -i "error" /tmp/build.log | tail -20 || echo "No 'error' found in log"; \
+        echo ""; \
         exit $BUILD_EXIT_CODE; \
-    fi && \
+    } && \
     echo "✅ Build command completed successfully"
 
 # Step 4: Verify dist folder exists
