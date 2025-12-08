@@ -57,12 +57,16 @@ RUN echo "=== TypeScript Check ===" && \
 
 # Step 3: Run build (separate step to see errors clearly)
 RUN echo "=== Starting Build ===" && \
-    npm run build 2>&1 | tee /tmp/build.log || ( \
-        echo "❌ Build failed! Showing last 100 lines of build log:" && \
+    npm run build 2>&1 | tee /tmp/build.log; \
+    BUILD_EXIT_CODE=${PIPESTATUS[0]}; \
+    if [ $BUILD_EXIT_CODE -ne 0 ]; then \
+        echo "❌ Build failed with exit code: $BUILD_EXIT_CODE" && \
+        echo "Showing last 100 lines of build log:" && \
         tail -100 /tmp/build.log && \
         echo "Full build log saved to /tmp/build.log" && \
-        exit 1 \
-    )
+        exit $BUILD_EXIT_CODE; \
+    fi && \
+    echo "✅ Build command completed successfully"
 
 # Step 4: Verify dist folder exists
 RUN echo "=== Verifying Build Output ===" && \
@@ -72,8 +76,18 @@ RUN echo "=== Verifying Build Output ===" && \
         ls -la /app/ && \
         echo "Checking package.json build script:" && \
         cat package.json | grep -A 2 '"build"' && \
-        echo "Build log:" && \
-        tail -50 /tmp/build.log || echo "No build log found" && \
+        echo "" && \
+        echo "Last 100 lines of build log:" && \
+        if [ -f /tmp/build.log ]; then \
+            tail -100 /tmp/build.log; \
+        else \
+            echo "⚠️ Build log file not found"; \
+        fi && \
+        echo "" && \
+        echo "Checking for common build issues..." && \
+        echo "Vite config exists: $([ -f vite.config.ts ] && echo 'YES' || echo 'NO')" && \
+        echo "TypeScript config exists: $([ -f tsconfig.json ] && echo 'YES' || echo 'NO')" && \
+        echo "Node modules exists: $([ -d node_modules ] && echo 'YES' || echo 'NO')" && \
         exit 1; \
     fi && \
     echo "✅ dist folder exists!" && \
