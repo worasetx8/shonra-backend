@@ -55,27 +55,9 @@ RUN echo "=== Build Environment Check ===" && \
 RUN echo "=== TypeScript Check ===" && \
     npx tsc --noEmit 2>&1 | head -50 || echo "⚠️ TypeScript check completed (warnings may exist)"
 
-# Step 3: Run build (separate step to see errors clearly)
+# Step 3: Run build (show output directly for better debugging)
 RUN echo "=== Starting Build ===" && \
-    npm run build > /tmp/build.log 2>&1; \
-    BUILD_EXIT_CODE=$?; \
-    if [ $BUILD_EXIT_CODE -ne 0 ]; then \
-        echo ""; \
-        echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"; \
-        echo ""; \
-        echo "=== Full Build Log ==="; \
-        cat /tmp/build.log; \
-        echo ""; \
-        echo "=== Checking for errors ==="; \
-        grep -i "error" /tmp/build.log | head -30 || echo "No 'error' keyword found"; \
-        echo ""; \
-        echo "=== Checking for warnings ==="; \
-        grep -i "warn" /tmp/build.log | head -20 || echo "No warnings found"; \
-        exit $BUILD_EXIT_CODE; \
-    fi && \
-    echo "✅ Build command completed successfully" && \
-    echo "Build output summary:" && \
-    tail -20 /tmp/build.log
+    npm run build
 
 # Step 4: Verify dist folder exists
 RUN echo "=== Verifying Build Output ===" && \
