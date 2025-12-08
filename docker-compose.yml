@@ -8,6 +8,8 @@ services:
       dockerfile: Dockerfile
       args:
         - VITE_API_URL=${VITE_API_URL:-http://localhost:3002}
+        - SERVER_URL=${SERVER_URL:-http://localhost:3002}
+        - GEMINI_API_KEY=${GEMINI_API_KEY:-}
     container_name: shonra-backend-admin
     env_file:
       - stack.env

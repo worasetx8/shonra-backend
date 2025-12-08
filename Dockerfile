@@ -24,13 +24,22 @@ ARG VITE_API_URL
 ARG SERVER_URL
 ARG GEMINI_API_KEY
 
-# Set environment variables for build
+# Set environment variables for build (Vite only reads VITE_* prefixed vars)
 ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_SERVER_URL=${SERVER_URL}
 ENV SERVER_URL=${SERVER_URL}
 ENV GEMINI_API_KEY=${GEMINI_API_KEY}
 
-# Build the application
-RUN npm run build
+# Debug: Print environment variables (remove in production if needed)
+RUN echo "Building with VITE_API_URL=${VITE_API_URL}" && \
+    echo "Building with SERVER_URL=${SERVER_URL}" && \
+    echo "Building with GEMINI_API_KEY=${GEMINI_API_KEY:+SET}" && \
+    echo "GEMINI_API_KEY is ${GEMINI_API_KEY:-NOT SET}"
+
+# Build the application with better error handling
+RUN echo "Starting build process..." && \
+    npm run build 2>&1 | tee /tmp/build.log || \
+    (echo "❌ Build failed! Error log:" && cat /tmp/build.log && exit 1)
 
 # Stage 2: Production server with nginx
 FROM nginx:alpine
