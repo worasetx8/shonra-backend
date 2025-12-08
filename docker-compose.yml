@@ -11,6 +11,7 @@ services:
         - SERVER_URL=${SERVER_URL:-http://localhost:3002}
         - GEMINI_API_KEY=${GEMINI_API_KEY:-}
     container_name: shonra-backend-admin
+    image: shonra-backend-admin:1.0.0
     env_file:
       - stack.env
     restart: always
@@ -28,4 +29,5 @@ services:
     ports:
       - '5173:80'
     # Note: Port 80 is nginx serving the built static files
+
 

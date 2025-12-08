@@ -1,77 +1,43 @@
-# Multi-stage build for React + Vite Admin Panel
-
-# Stage 1: Build the application
-FROM node:20-alpine AS builder
-
-# Install build dependencies
-RUN apk add --no-cache python3 make g++
+# Build Stage
+FROM node:20.15.1-alpine AS build
 
 WORKDIR /app
 
-# Copy package files first (for better layer caching)
-COPY package.json package-lock.json* ./
-
-# Install dependencies (including devDependencies for build)
-# Use npm install with legacy-peer-deps to handle peer dependency conflicts
-RUN npm install --legacy-peer-deps --verbose || \
-    (echo "npm install failed, trying npm ci..." && npm ci --legacy-peer-deps || npm install --legacy-peer-deps)
-
-# Copy source code
-COPY . .
-
-# Build arguments for environment variables
+# Build arguments for environment variables (must be before COPY)
 ARG VITE_API_URL
 ARG SERVER_URL
 ARG GEMINI_API_KEY
 
-# Set environment variables for build (Vite only reads VITE_* prefixed vars)
+# Set environment variables for build
 ENV VITE_API_URL=${VITE_API_URL}
-ENV VITE_SERVER_URL=${SERVER_URL}
 ENV SERVER_URL=${SERVER_URL}
 ENV GEMINI_API_KEY=${GEMINI_API_KEY}
 
-# Debug: Print environment variables (remove in production if needed)
-RUN echo "Building with VITE_API_URL=${VITE_API_URL}" && \
-    echo "Building with SERVER_URL=${SERVER_URL}" && \
-    echo "Building with GEMINI_API_KEY=${GEMINI_API_KEY:+SET}" && \
-    echo "GEMINI_API_KEY is ${GEMINI_API_KEY:-NOT SET}"
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+
+# Copy source code
+COPY . .
+
+# Verify source files exist
+RUN echo "=== Verifying Source Files ===" && \
+    test -f vite.config.ts && echo "✅ vite.config.ts" || echo "❌ vite.config.ts MISSING" && \
+    test -f tsconfig.json && echo "✅ tsconfig.json" || echo "❌ tsconfig.json MISSING" && \
+    test -f index.html && echo "✅ index.html" || echo "❌ index.html MISSING" && \
+    echo "Environment: VITE_API_URL=${VITE_API_URL:-NOT SET}"
 
 # Build the application
-RUN echo "=== Build Environment ===" && \
-    echo "Node: $(node --version)" && \
-    echo "NPM: $(npm --version)" && \
-    echo "VITE_API_URL: ${VITE_API_URL:-NOT SET}" && \
-    echo "SERVER_URL: ${SERVER_URL:-NOT SET}" && \
-    echo "" && \
-    echo "=== Verifying Source Files ===" && \
-    test -f vite.config.ts && echo "✅ vite.config.ts" || (echo "❌ vite.config.ts MISSING" && exit 1) && \
-    test -f tsconfig.json && echo "✅ tsconfig.json" || (echo "❌ tsconfig.json MISSING" && exit 1) && \
-    test -f package.json && echo "✅ package.json" || (echo "❌ package.json MISSING" && exit 1) && \
-    test -f index.html && echo "✅ index.html" || (echo "❌ index.html MISSING" && exit 1) && \
-    echo "" && \
-    echo "=== Running Build ===" && \
-    npm run build
+RUN echo "=== Building Application ===" && \
+    npm run build && \
+    echo "=== Build Complete ===" && \
+    ls -la /app/dist/ || echo "❌ dist folder not found"
 
-# Verify dist folder was created (build should have created it)
-RUN echo "=== Verifying Build Output ===" && \
-    if [ ! -d "/app/dist" ]; then \
-        echo "❌ ERROR: dist folder not found after build!" && \
-        echo "This means the build step failed. Check the build output above." && \
-        exit 1; \
-    fi && \
-    echo "✅ dist folder exists!" && \
-    echo "Contents:" && \
-    ls -la /app/dist/
-
-# Stage 2: Production server with nginx
+# Production Stage
 FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy built files from builder stage
-# Verify the source exists before copying
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copy nginx configuration (if exists, otherwise use default)
-# Create a custom nginx config for SPA routing
+# Nginx configuration for SPA
 RUN echo 'server { \
     listen 80; \
     server_name _; \
@@ -89,7 +55,7 @@ RUN echo 'server { \
     add_header X-Content-Type-Options "nosniff" always; \
     add_header X-XSS-Protection "1; mode=block" always; \
     \
-    # SPA routing - redirect all requests to index.html \
+    # SPA routing \
     location / { \
         try_files $uri $uri/ /index.html; \
     } \
@@ -100,16 +66,12 @@ RUN echo 'server { \
         add_header Cache-Control "public, immutable"; \
     } \
     \
-    # Don\'t cache HTML files \
+    # Don'\''t cache HTML files \
     location ~* \.html$ { \
         expires -1; \
         add_header Cache-Control "no-cache, no-store, must-revalidate"; \
     } \
 }' > /etc/nginx/conf.d/default.conf
 
-# Expose port 80
 EXPOSE 80
-
-# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
-
