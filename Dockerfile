@@ -3,7 +3,7 @@ FROM node:20.15.1-alpine AS build
 
 WORKDIR /app
 
-# Build arguments for environment variables (must be before COPY)
+# Build arguments for environment variables
 ARG VITE_API_URL
 ARG SERVER_URL
 ARG GEMINI_API_KEY
@@ -20,30 +20,8 @@ RUN npm install --legacy-peer-deps
 # Copy source code
 COPY . .
 
-# Verify source files exist
-RUN echo "=== Verifying Source Files ===" && \
-    test -f vite.config.ts && echo "✅ vite.config.ts" || echo "❌ vite.config.ts MISSING" && \
-    test -f tsconfig.json && echo "✅ tsconfig.json" || echo "❌ tsconfig.json MISSING" && \
-    test -f index.html && echo "✅ index.html" || echo "❌ index.html MISSING" && \
-    echo "Environment: VITE_API_URL=${VITE_API_URL:-NOT SET}"
-
-# Build the application (show all output)
-RUN echo "=== Building Application ===" && \
-    npm run build 2>&1 || ( \
-        echo "" && \
-        echo "❌ Build failed! Exit code: $?" && \
-        echo "Check the build output above for error messages." && \
-        exit 1 \
-    )
-
-# Verify dist folder was created
-RUN if [ ! -d "/app/dist" ]; then \
-        echo "❌ ERROR: dist folder not found after build!" && \
-        echo "This means the build step failed." && \
-        exit 1; \
-    fi && \
-    echo "✅ dist folder exists!" && \
-    ls -la /app/dist/
+# Build the application
+RUN npm run build
 
 # Production Stage
 FROM nginx:alpine

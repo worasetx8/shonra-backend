@@ -9,9 +9,9 @@ export default defineConfig(({ mode }) => {
     // Override with process.env if set (for Docker build args)
     VITE_API_URL: process.env.VITE_API_URL || loadEnv(mode, ".", "").VITE_API_URL,
     SERVER_URL: process.env.SERVER_URL || loadEnv(mode, ".", "").SERVER_URL,
-    GEMINI_API_KEY: process.env.GEMINI_API_KEY || loadEnv(mode, ".", "").GEMINI_API_KEY,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY || loadEnv(mode, ".", "").GEMINI_API_KEY
   };
-  
+
   return {
     server: {
       port: 5173,
