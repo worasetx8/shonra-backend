@@ -36,42 +36,24 @@ RUN echo "Building with VITE_API_URL=${VITE_API_URL}" && \
     echo "Building with GEMINI_API_KEY=${GEMINI_API_KEY:+SET}" && \
     echo "GEMINI_API_KEY is ${GEMINI_API_KEY:-NOT SET}"
 
-# Build the application with better error handling
-# Step 1: Check environment and files
-RUN echo "=== Build Environment Check ===" && \
-    echo "Current directory: $(pwd)" && \
-    echo "Node version: $(node --version)" && \
-    echo "NPM version: $(npm --version)" && \
-    echo "Files in /app:" && \
-    ls -la /app/ | head -20 && \
-    echo "Environment variables:" && \
-    env | grep -E "(VITE|SERVER|GEMINI)" || echo "No VITE/SERVER/GEMINI vars found" && \
-    echo "Checking TypeScript config..." && \
-    test -f tsconfig.json && echo "✅ tsconfig.json exists" || echo "⚠️ tsconfig.json not found" && \
-    echo "Checking vite config..." && \
-    test -f vite.config.ts && echo "✅ vite.config.ts exists" || echo "⚠️ vite.config.ts not found"
-
-# Step 2: Check TypeScript compilation (without emitting files) - skip if fails
-RUN echo "=== TypeScript Check ===" && \
-    npx tsc --noEmit 2>&1 | head -50 || echo "⚠️ TypeScript check completed (warnings may exist)"
-
-# Step 3: Verify build script and dependencies
-RUN echo "=== Verifying Build Setup ===" && \
-    echo "Package.json build script:" && \
-    cat package.json | grep -A 2 '"build"' && \
+# Build the application
+RUN echo "=== Build Environment ===" && \
+    echo "Node: $(node --version)" && \
+    echo "NPM: $(npm --version)" && \
+    echo "VITE_API_URL: ${VITE_API_URL:-NOT SET}" && \
+    echo "SERVER_URL: ${SERVER_URL:-NOT SET}" && \
     echo "" && \
-    echo "Checking Vite installation:" && \
-    npm list vite 2>&1 | head -5 || echo "Vite check failed" && \
+    echo "=== Verifying Source Files ===" && \
+    test -f vite.config.ts && echo "✅ vite.config.ts" || echo "❌ vite.config.ts MISSING" && \
+    test -f tsconfig.json && echo "✅ tsconfig.json" || echo "❌ tsconfig.json MISSING" && \
+    test -f package.json && echo "✅ package.json" || echo "❌ package.json MISSING" && \
+    test -f index.html && echo "✅ index.html" || echo "❌ index.html MISSING" && \
     echo "" && \
-    echo "Checking if vite.config.ts exists:" && \
-    test -f vite.config.ts && echo "✅ vite.config.ts exists" || echo "❌ vite.config.ts NOT FOUND" && \
+    echo "=== Running Build ===" && \
+    npm run build && \
     echo "" && \
-    echo "Checking if tsconfig.json exists:" && \
-    test -f tsconfig.json && echo "✅ tsconfig.json exists" || echo "❌ tsconfig.json NOT FOUND"
-
-# Step 4: Run build - show all output directly
-RUN echo "=== Starting Build ===" && \
-    npm run build
+    echo "=== Build Completed ===" && \
+    ls -la /app/dist/ || echo "❌ dist folder not found"
 
 # Step 4: Verify dist folder exists
 RUN echo "=== Verifying Build Output ===" && \
