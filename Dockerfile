@@ -51,13 +51,18 @@ RUN echo 'server { \
     add_header X-XSS-Protection "1; mode=block" always; \
     \
     # SPA routing with base path /backoffice \
-    location /backoffice { \
+    location /backoffice/ { \
         try_files $uri $uri/ /backoffice/index.html; \
+    } \
+    \
+    # Redirect /backoffice to /backoffice/ \
+    location = /backoffice { \
+        return 301 /backoffice/; \
     } \
     \
     # Root redirect to /backoffice \
     location = / { \
-        return 301 /backoffice; \
+        return 301 /backoffice/; \
     } \
     \
     # Cache static assets \
