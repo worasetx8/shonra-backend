@@ -52,10 +52,11 @@ RUN echo 'server { \
     \
     # Static assets with base path /backoffice/assets \
     # Vite builds files in /assets/ but references them as /backoffice/assets/... \
-    location /backoffice/assets/ { \
-        alias /usr/share/nginx/html/assets/; \
+    location /backoffice/assets { \
+        alias /usr/share/nginx/html/assets; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
+        access_log off; \
     } \
     \
     # SPA routing with base path /backoffice \
