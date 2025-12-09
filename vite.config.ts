@@ -9,11 +9,12 @@ export default defineConfig(({ mode }) => {
     // Override with process.env if set (for Docker build args)
     VITE_API_URL: process.env.VITE_API_URL || loadEnv(mode, ".", "").VITE_API_URL,
     SERVER_URL: process.env.SERVER_URL || loadEnv(mode, ".", "").SERVER_URL,
-    GEMINI_API_KEY: process.env.GEMINI_API_KEY || loadEnv(mode, ".", "").GEMINI_API_KEY
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY || loadEnv(mode, ".", "").GEMINI_API_KEY,
+    VITE_BASE_PATH: process.env.VITE_BASE_PATH || loadEnv(mode, ".", "").VITE_BASE_PATH || '/backoffice'
   };
 
   return {
-    base: process.env.VITE_BASE_PATH || '/backoffice',
+    base: env.VITE_BASE_PATH,
     server: {
       port: 5173,
       host: "0.0.0.0",
