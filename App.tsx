@@ -115,7 +115,25 @@ const AppContent: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    setHeaderContent(null);
+    // Only clear header for views that don't manage their own header
+    // Views that manage their own header: ADD_PRODUCT, MANAGE_PRODUCTS, etc.
+    const viewsWithCustomHeader = [
+      View.ADD_PRODUCT,
+      View.MANAGE_PRODUCTS,
+      View.MANAGE_ADMINS,
+      View.MANAGE_ROLES,
+      View.MANAGE_CATEGORIES,
+      View.MANAGE_TAGS,
+      View.MANAGE_BANNER_POSITIONS,
+      View.MANAGE_BANNER_CAMPAIGNS,
+      View.MANAGE_BANNERS,
+      View.MANAGE_BANNER_IMAGES,
+      View.SETTINGS
+    ];
+    
+    if (!viewsWithCustomHeader.includes(currentView)) {
+      setHeaderContent(null);
+    }
   }, [currentView, setHeaderContent]);
 
   const checkAuthentication = async () => {
