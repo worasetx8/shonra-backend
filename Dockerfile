@@ -31,6 +31,10 @@ FROM nginx:alpine
 # Copy built files from builder stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Set proper permissions for nginx
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
+
 # Nginx configuration for SPA with base path /backoffice
 # Vite build includes /backoffice in base path, so nginx must serve at /backoffice
 RUN echo 'server { \
