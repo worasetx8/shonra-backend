@@ -17,7 +17,7 @@ import { ManageAdmins } from './components/ManageAdmins';
 import { ChangePassword } from './components/ChangePassword';
 import { View, Product, Admin, Category } from './types';
 import { apiService } from './services/api';
-import { Search, Bell, Plus, MoreHorizontal, Trash2, Edit2, Filter, CheckCircle, AlertCircle, Mail, Menu, LogOut, User, Settings as SettingsIcon, ChevronDown, Shield } from 'lucide-react';
+import { Search, Bell, Plus, MoreHorizontal, Trash2, Edit2, Filter, CheckCircle, AlertCircle, Mail, Menu, LogOut, User, Settings as SettingsIcon, ChevronDown, Shield, Package } from 'lucide-react';
 import { DialogProvider, useDialog } from './context/DialogContext';
 import { LayoutProvider, useLayout } from './context/LayoutContext';
 
@@ -343,7 +343,9 @@ const AppContent: React.FC = () => {
       [View.MANAGE_BANNER_CAMPAIGNS]: null,
       [View.MANAGE_BANNERS]: null,
       [View.SETTINGS]: null,
-      [View.ADD_PRODUCT]: null
+      [View.ADD_PRODUCT]: (
+        <HeaderAction icon={Package} label="Manage Products" onClick={() => setCurrentView(View.MANAGE_PRODUCTS)} />
+      )
     };
 
     const getDescription = () => {
