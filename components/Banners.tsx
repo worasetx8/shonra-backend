@@ -639,7 +639,7 @@ export const Banners: React.FC = () => {
 
                   {formData.image_url && !showCropper && (
                       <div className="relative rounded-xl overflow-hidden border border-zinc-700 group">
-                          <img src={formData.image_url} alt="Preview" className="w-full h-auto max-h-[400px] object-contain bg-black" />
+                          <img src={getFullImageUrl(formData.image_url)} alt="Preview" className="w-full h-auto max-h-[400px] object-contain bg-black" />
                           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                               <button 
                                   onClick={() => fileInputRef.current?.click()}

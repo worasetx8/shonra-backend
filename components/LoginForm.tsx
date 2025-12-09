@@ -69,7 +69,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
               <img 
                 src={settings.logo_url.startsWith('http') 
                   ? settings.logo_url 
-                  : `${window.location.origin}${settings.logo_url}`} 
+                  : `${import.meta.env.VITE_API_URL || import.meta.env.SERVER_URL || 'http://localhost:3002'}${settings.logo_url}`} 
                 alt="Logo" 
                 className="w-full h-full object-contain" 
                 onError={(e) => {

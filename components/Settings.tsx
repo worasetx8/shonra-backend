@@ -410,7 +410,7 @@ export const Settings: React.FC = () => {
                   <img 
                     src={settings.logo_backend_url.startsWith('http') 
                       ? settings.logo_backend_url 
-                      : `${window.location.origin}${settings.logo_backend_url}`} 
+                      : `${import.meta.env.VITE_API_URL || import.meta.env.SERVER_URL || 'http://localhost:3002'}${settings.logo_backend_url}`} 
                     alt="Backend Logo" 
                     className="w-full h-full object-contain"
                     onError={(e) => {
@@ -464,7 +464,7 @@ export const Settings: React.FC = () => {
                   <img 
                     src={settings.logo_client_url.startsWith('http') 
                       ? settings.logo_client_url 
-                      : `${window.location.origin}${settings.logo_client_url}`} 
+                      : `${import.meta.env.VITE_API_URL || import.meta.env.SERVER_URL || 'http://localhost:3002'}${settings.logo_client_url}`} 
                     alt="Client Logo" 
                     className="w-full h-full object-contain"
                     onError={(e) => {
