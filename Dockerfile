@@ -61,9 +61,9 @@ RUN echo 'server { \
     \
     # SPA routing with base path /backoffice \
     # Vite builds index.html in root / but it should be served at /backoffice/ \
-    location /backoffice/ { \
-        alias /usr/share/nginx/html/; \
-        try_files $uri $uri/ /backoffice/index.html; \
+    location /backoffice { \
+        alias /usr/share/nginx/html; \
+        try_files $uri $uri/ /index.html; \
         index index.html; \
     } \
     \
