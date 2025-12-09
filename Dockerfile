@@ -53,9 +53,17 @@ RUN echo 'server { \
     # Static assets with base path /backoffice/assets \
     # Vite builds files in /assets/ but references them as /backoffice/assets/... \
     location /backoffice/assets { \
-        alias /usr/share/nginx/html/assets; \
+        rewrite ^/backoffice/assets/(.*)$ /assets/$1 break; \
+        root /usr/share/nginx/html; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
+        access_log off; \
+    } \
+    \
+    # Favicon with base path /backoffice \
+    location /backoffice/favicon.ico { \
+        rewrite ^/backoffice/favicon.ico$ /favicon.ico break; \
+        root /usr/share/nginx/html; \
         access_log off; \
     } \
     \
