@@ -537,6 +537,21 @@ export const ProductSearch: React.FC = () => {
                 </div>
               </div>
             </form>
+
+            {/* Toggle to Manage Products */}
+            <div className="mt-4 pt-4 border-t border-zinc-800">
+              <button
+                onClick={() => {
+                  const event = new CustomEvent('navigate', { detail: { view: 'MANAGE_PRODUCTS' } });
+                  window.dispatchEvent(event);
+                }}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                title="View and manage your saved products"
+              >
+                <Package className="w-4 h-4" />
+                <span>View Saved Products</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

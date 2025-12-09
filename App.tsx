@@ -96,8 +96,22 @@ const AppContent: React.FC = () => {
       setCurrentView(View.DASHBOARD);
     };
 
+    // Listen for navigation events
+    const handleNavigate = (event: any) => {
+      const view = event.detail?.view;
+      if (view === 'ADD_PRODUCT') {
+        setCurrentView(View.ADD_PRODUCT);
+      } else if (view === 'MANAGE_PRODUCTS') {
+        setCurrentView(View.MANAGE_PRODUCTS);
+      }
+    };
+
     window.addEventListener('auth:expired', handleAuthExpired);
-    return () => window.removeEventListener('auth:expired', handleAuthExpired);
+    window.addEventListener('navigate', handleNavigate);
+    return () => {
+      window.removeEventListener('auth:expired', handleAuthExpired);
+      window.removeEventListener('navigate', handleNavigate);
+    };
   }, []);
 
   useEffect(() => {
@@ -343,9 +357,7 @@ const AppContent: React.FC = () => {
       [View.MANAGE_BANNER_CAMPAIGNS]: null,
       [View.MANAGE_BANNERS]: null,
       [View.SETTINGS]: null,
-      [View.ADD_PRODUCT]: (
-        <HeaderAction icon={Package} label="Manage Products" onClick={() => setCurrentView(View.MANAGE_PRODUCTS)} />
-      )
+      [View.ADD_PRODUCT]: null
     };
 
     const getDescription = () => {

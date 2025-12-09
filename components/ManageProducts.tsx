@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Filter, Trash2, Edit, RefreshCw, Package, AlertTriangle, Star, Loader, ExternalLink, Copy, Zap, Folder, Tag as TagIcon, Check, X as XIcon, X, ChevronUp, ChevronDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, Filter, Trash2, Edit, RefreshCw, Package, AlertTriangle, Star, Loader, ExternalLink, Copy, Zap, Folder, Tag as TagIcon, Check, X as XIcon, X, ChevronUp, ChevronDown, ArrowUp, ArrowDown, Plus } from 'lucide-react';
 import { apiService } from '../services/api';
 import { useDialog } from '../context/DialogContext';
 import { useLayout } from '../context/LayoutContext';
@@ -486,6 +486,21 @@ const ManageProducts: React.FC = () => {
                     <span className="text-zinc-500">Page {currentPage} of {totalPages}</span>
                   )}
                 </div>
+              </div>
+
+              {/* Toggle to Add Product */}
+              <div className="mt-4 pt-4 border-t border-zinc-800">
+                <button
+                  onClick={() => {
+                    const event = new CustomEvent('navigate', { detail: { view: 'ADD_PRODUCT' } });
+                    window.dispatchEvent(event);
+                  }}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                  title="Search and add new products from Shopee"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Search & Add New Products</span>
+                </button>
               </div>
             </div>
         </div>
