@@ -31,8 +31,8 @@ FROM nginx:alpine
 # Copy built files from builder stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Nginx configuration for SPA
-# Note: Backend admin serves at root path, nginx-proxy will handle /backoffice prefix
+# Nginx configuration for SPA with base path /backoffice
+# Vite build includes /backoffice in base path, so nginx must serve at /backoffice
 RUN echo 'server { \
     listen 5173; \
     server_name _; \
@@ -50,9 +50,14 @@ RUN echo 'server { \
     add_header X-Content-Type-Options "nosniff" always; \
     add_header X-XSS-Protection "1; mode=block" always; \
     \
-    # SPA routing \
-    location / { \
-        try_files $uri $uri/ /index.html; \
+    # SPA routing with base path /backoffice \
+    location /backoffice { \
+        try_files $uri $uri/ /backoffice/index.html; \
+    } \
+    \
+    # Root redirect to /backoffice \
+    location = / { \
+        return 301 /backoffice; \
     } \
     \
     # Cache static assets \
