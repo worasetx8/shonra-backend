@@ -80,7 +80,7 @@ export const ProductSearch: React.FC = () => {
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [productSelections, setProductSelections] = useState<Record<string, ProductSelection>>({});
   const [editingTagsId, setEditingTagsId] = useState<string | null>(null);
-  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+  const [isFilterExpanded, setIsFilterExpanded] = useState(true);
 
   const { showAlert } = useDialog();
   const { setHeaderContent } = useLayout();
