@@ -361,7 +361,7 @@ export const ProductSearch: React.FC = () => {
         tags: selection.tagIds
       };
 
-      console.log('saveData:', saveData);
+     
 
       const response = await apiService.saveProduct(saveData);
       

@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Nginx Reverse Proxy
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: shonra-nginx-proxy
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend-admin
+    restart: always
+    networks:
+      - shonra-network
+
+  # Backend Admin Panel - React + Vite (Admin UI)
+  backend-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-https://api.shonra.com}
+        - SERVER_URL=${SERVER_URL:-https://api.shonra.com}
+        - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+        - VITE_BASE_PATH=/backoffice
+    container_name: shonra-backend-admin
+    image: shonra-backend-admin:1.0.2
+    env_file:
+      - stack.env
+    restart: always
+    expose:
+      - '5173'
+    networks:
+      - shonra-network
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+
+networks:
+  shonra-network:
+    driver: bridge
+

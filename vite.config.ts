@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => {
   };
 
   return {
+    base: process.env.VITE_BASE_PATH || '/backoffice',
     server: {
       port: 5173,
       host: "0.0.0.0",

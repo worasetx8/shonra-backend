@@ -7,11 +7,13 @@ WORKDIR /app
 ARG VITE_API_URL
 ARG SERVER_URL
 ARG GEMINI_API_KEY
+ARG VITE_BASE_PATH=/backoffice
 
 # Set environment variables for build
 ENV VITE_API_URL=${VITE_API_URL}
 ENV SERVER_URL=${SERVER_URL}
 ENV GEMINI_API_KEY=${GEMINI_API_KEY}
+ENV VITE_BASE_PATH=${VITE_BASE_PATH}
 
 # Copy package files and install dependencies
 COPY package*.json ./
@@ -30,8 +32,9 @@ FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Nginx configuration for SPA
+# Note: Backend admin serves at root path, nginx-proxy will handle /backoffice prefix
 RUN echo 'server { \
-    listen 80; \
+    listen 5173; \
     server_name _; \
     root /usr/share/nginx/html; \
     index index.html; \
@@ -65,5 +68,5 @@ RUN echo 'server { \
     } \
 }' > /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+EXPOSE 5173
 CMD ["nginx", "-g", "daemon off;"]
