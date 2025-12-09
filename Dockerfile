@@ -51,15 +51,19 @@ RUN echo 'server { \
     add_header X-XSS-Protection "1; mode=block" always; \
     \
     # Static assets with base path /backoffice/assets \
-    location /backoffice/assets { \
+    # Vite builds files in /assets/ but references them as /backoffice/assets/... \
+    location /backoffice/assets/ { \
+        alias /usr/share/nginx/html/assets/; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
-        try_files $uri =404; \
     } \
     \
     # SPA routing with base path /backoffice \
+    # Vite builds index.html in root / but it should be served at /backoffice/ \
     location /backoffice/ { \
+        alias /usr/share/nginx/html/; \
         try_files $uri $uri/ /backoffice/index.html; \
+        index index.html; \
     } \
     \
     # Redirect /backoffice to /backoffice/ \
