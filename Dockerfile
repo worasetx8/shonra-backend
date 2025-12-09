@@ -50,6 +50,13 @@ RUN echo 'server { \
     add_header X-Content-Type-Options "nosniff" always; \
     add_header X-XSS-Protection "1; mode=block" always; \
     \
+    # Static assets with base path /backoffice/assets \
+    location /backoffice/assets { \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+        try_files $uri =404; \
+    } \
+    \
     # SPA routing with base path /backoffice \
     location /backoffice/ { \
         try_files $uri $uri/ /backoffice/index.html; \
@@ -65,7 +72,7 @@ RUN echo 'server { \
         return 301 /backoffice/; \
     } \
     \
-    # Cache static assets \
+    # Cache static assets (fallback for other paths) \
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ { \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
