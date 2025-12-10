@@ -92,6 +92,10 @@ RUN echo 'server { \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
         access_log off; \
+        # Disable directory listing \
+        autoindex off; \
+        # Return 404 if file not found instead of directory listing \
+        try_files $uri =404; \
     } \
     \
     # Handle CSS files with /backoffice prefix \
