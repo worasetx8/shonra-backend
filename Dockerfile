@@ -57,50 +57,50 @@ RUN echo 'server { \
     # Static assets with base path /backoffice/assets \
     # Vite builds files in /assets/ but references them as /backoffice/assets/... \
     location /backoffice/assets { \
-        alias /usr/share/nginx/html/assets; \
-        expires 1y; \
-        add_header Cache-Control "public, immutable"; \
-        access_log off; \
+    alias /usr/share/nginx/html/assets; \
+    expires 1y; \
+    add_header Cache-Control "public, immutable"; \
+    access_log off; \
     } \
     \
     # Favicon with base path /backoffice \
     location /backoffice/favicon.ico { \
-        rewrite ^/backoffice/favicon.ico$ /favicon.ico break; \
-        root /usr/share/nginx/html; \
-        access_log off; \
+    rewrite ^/backoffice/favicon.ico$ /favicon.ico break; \
+    root /usr/share/nginx/html; \
+    access_log off; \
     } \
     \
     # SPA routing with base path /backoffice \
     # Serve /backoffice/ directly from root (no rewrite needed) \
     # Vite build uses <base href="/backoffice/"> so paths are already /backoffice/... \
     location /backoffice/ { \
-        alias /usr/share/nginx/html/; \
-        try_files $uri $uri/ /index.html; \
-        index index.html; \
+    alias /usr/share/nginx/html/; \
+    try_files $uri $uri/ /index.html; \
+    index index.html; \
     } \
     \
     # Redirect /backoffice to /backoffice/ \
     location = /backoffice { \
-        return 301 /backoffice/; \
+    return 301 /backoffice/; \
     } \
     \
     # Root redirect to /backoffice \
     location = / { \
-        return 301 /backoffice/; \
+    return 301 /backoffice/; \
     } \
     \
     # Cache static assets (fallback for other paths) \
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ { \
-        expires 1y; \
-        add_header Cache-Control "public, immutable"; \
+    expires 1y; \
+    add_header Cache-Control "public, immutable"; \
     } \
     \
     # Don'\''t cache HTML files \
     location ~* \.html$ { \
-        expires -1; \
-        add_header Cache-Control "no-cache, no-store, must-revalidate"; \
+    expires -1; \
+    add_header Cache-Control "no-cache, no-store, must-revalidate"; \
     } \
-}' > /etc/nginx/conf.d/default.conf
+    }' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 5173
 CMD ["nginx", "-g", "daemon off;"]
