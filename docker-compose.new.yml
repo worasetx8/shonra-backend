@@ -50,5 +50,6 @@ services:
 
 networks:
   shonra-network:
-    driver: bridge
+    external: true
+    name: 36_shonra-network
 
