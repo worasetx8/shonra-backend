@@ -1,23 +1,46 @@
 version: '3.8'
 
 services:
+  # Nginx Reverse Proxy
+  nginx-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx-proxy
+    container_name: shonra-nginx-proxy
+    image: shonra-nginx-proxy:1.0.5
+    ports:
+      - '80:80'
+    depends_on:
+      - backend-admin
+    restart: always
+    networks:
+      - shonra-network
+
   # Backend Admin Panel - React + Vite (Admin UI)
   backend-admin:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=${VITE_API_URL:-http://localhost:3002}
-        - SERVER_URL=${SERVER_URL:-http://localhost:3002}
+        - VITE_API_URL=${VITE_API_URL:-https://api.shonra.com}
+        - SERVER_URL=${SERVER_URL:-https://api.shonra.com}
         - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+        - VITE_BASE_PATH=/backoffice
     container_name: shonra-backend-admin
-    image: shonra-backend-admin:1.0.1
+    image: shonra-backend-admin:1.0.5
     env_file:
       - stack.env
     restart: always
-    # Resource limits - Optimized for 2 cores, 8GB RAM
-    # For 4+ cores: Increase to 0.5 CPU, 512MB RAM
-    # For 8+ cores: Increase to 1 CPU, 1GB RAM
+    # Expose port for internal network access (nginx-proxy)
+    expose:
+      - '5173'
+    # Optional: Map port to host for direct access (for debugging)
+    # Uncomment if you need direct access from host
+    # ports:
+    #   - '5173:5173'
+    networks:
+      - shonra-network
+    # Resource limits
     deploy:
       resources:
         limits:
@@ -26,8 +49,9 @@ services:
         reservations:
           cpus: '0.1'
           memory: 128M
-    ports:
-      - '5173:80'
-    # Note: Port 80 is nginx serving the built static files
+
+networks:
+  shonra-network:
+    external: true
 
 
