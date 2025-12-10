@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile.nginx-proxy
     container_name: shonra-nginx-proxy
-    image: shonra-nginx-proxy:1.0.2
+    image: shonra-nginx-proxy:1.0.3
     ports:
       - '80:80'
     depends_on:
@@ -25,7 +25,7 @@ services:
         - GEMINI_API_KEY=${GEMINI_API_KEY:-}
         - VITE_BASE_PATH=/backoffice
     container_name: shonra-backend-admin
-    image: shonra-backend-admin:1.0.2
+    image: shonra-backend-admin:1.0.3
     env_file:
       - stack.env
     restart: always
@@ -50,6 +50,5 @@ services:
 
 networks:
   shonra-network:
-    external: true
-    name: 36_shonra-network
+    driver: bridge
 
