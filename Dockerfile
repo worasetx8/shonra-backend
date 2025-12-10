@@ -56,7 +56,8 @@ RUN echo 'server { \
     \
     # Static assets with base path /backoffice/assets \
     # Vite builds files in /assets/ but references them as /backoffice/assets/... \
-    location /backoffice/assets/ { \
+    # Use ^~ to prevent regex locations from matching \
+    location ^~ /backoffice/assets/ { \
     alias /usr/share/nginx/html/assets/; \
     expires 1y; \
     add_header Cache-Control "public, immutable"; \
