@@ -23,7 +23,16 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # Build the application
-RUN npm run build
+RUN npm run build && \
+    echo "=== Build completed ===" && \
+    echo "=== Checking dist folder ===" && \
+    ls -la dist/ && \
+    echo "=== Checking dist/assets folder ===" && \
+    ls -la dist/assets/ 2>/dev/null || echo "No assets folder found" && \
+    echo "=== Checking index.html content ===" && \
+    head -20 dist/index.html && \
+    echo "=== Checking for script tags in index.html ===" && \
+    grep -i "script" dist/index.html | head -5 || echo "No script tags found"
 
 # Final stage: Nginx server to serve the built files
 FROM nginx:alpine
