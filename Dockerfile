@@ -68,7 +68,7 @@ RUN echo 'server { \
     # Vite build uses <base href="/backoffice/"> so paths are already /backoffice/... \
     location /backoffice/ { \
     alias /usr/share/nginx/html/; \
-    try_files $uri $uri/ /index.html; \
+    try_files $uri $uri/ /backoffice/index.html; \
     index index.html; \
     } \
     \
