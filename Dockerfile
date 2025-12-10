@@ -63,13 +63,6 @@ RUN echo 'server { \
     access_log off; \
     } \
     \
-    # Favicon with base path /backoffice \
-    location /backoffice/favicon.ico { \
-    rewrite ^/backoffice/favicon.ico$ /favicon.ico break; \
-    root /usr/share/nginx/html; \
-    access_log off; \
-    } \
-    \
     # SPA routing with base path /backoffice \
     # Serve /backoffice/ directly from root (no rewrite needed) \
     # Vite build uses <base href="/backoffice/"> so paths are already /backoffice/... \
