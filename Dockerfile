@@ -49,8 +49,15 @@ RUN echo 'server { \
     gzip_min_length 1024; \
     gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/json application/javascript; \
     \
+    # Set proper MIME types for JavaScript modules \
+    types { \
+        application/javascript js mjs; \
+        text/css css; \
+        text/html html htm; \
+    } \
+    \
     # Handle static assets (JS, CSS, images, fonts) \
-    # Vite builds assets in /assets/ but HTML references them as /backoffice/assets/... \
+    # Vite builds assets in /assets/ and HTML references them as /backoffice/assets/... \
     # So we need to strip /backoffice prefix and serve from /assets/ \
     location /backoffice/assets/ { \
         alias /usr/share/nginx/html/assets/; \
@@ -59,18 +66,31 @@ RUN echo 'server { \
         access_log off; \
     } \
     \
-    # Handle other static files referenced with /backoffice prefix \
-    # e.g., /backoffice/index.css, /backoffice/index.tsx \
-    location ~ ^/backoffice/(.+\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|tsx))$ { \
+    # Handle CSS files with /backoffice prefix \
+    location ~ ^/backoffice/(.+\.css)$ { \
         alias /usr/share/nginx/html/$1; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
     } \
     \
-    # Handle absolute paths that might still exist in HTML (fallback) \
-    # e.g., /index.css, /index.tsx (if Vite did not convert them) \
-    location ~ ^/(index\.(css|tsx|js)|assets/.+)$ { \
-        try_files $uri =404; \
+    # Handle JS/TSX files with /backoffice prefix \
+    # Note: Vite will convert ./index.tsx to /backoffice/assets/index-xxx.js when building \
+    # This location is a fallback in case the path was not converted \
+    location ~ ^/backoffice/(.+\.(js|mjs|tsx))$ { \
+        alias /usr/share/nginx/html/$1; \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+    } \
+    \
+    # Handle other static files referenced with /backoffice prefix \
+    location ~ ^/backoffice/(.+\.(png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot))$ { \
+        alias /usr/share/nginx/html/$1; \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+    } \
+    \
+    # Handle absolute paths at root (fallback for assets) \
+    location /assets/ { \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
     } \
