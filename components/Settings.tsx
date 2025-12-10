@@ -77,6 +77,7 @@ export const Settings: React.FC = () => {
   const [cropTarget, setCropTarget] = useState<'logo_backend' | 'logo_client' | 'social_icon'>('logo_backend');
   const fileInputRefBackend = useRef<HTMLInputElement>(null);
   const fileInputRefClient = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [currentUser, setCurrentUser] = useState<any>(null);
 
@@ -1061,7 +1062,7 @@ export const Settings: React.FC = () => {
                 <textarea
                   value={settings.meta_description || ''}
                   onChange={(e) => setSettings({ ...settings, meta_description: e.target.value })}
-                  placeholder="Discover amazing deals and earn commissions with SHONRA..."
+                  placeholder="All amazing deals and earn commissions with SHONRA..."
                   rows={3}
                   maxLength={160}
                   className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
