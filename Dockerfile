@@ -56,9 +56,25 @@ RUN echo 'server { \
         text/html html htm; \
     } \
     \
-    # Handle static assets (JS, CSS, images, fonts) \
-    # Vite builds assets in /assets/ and HTML references them as /backoffice/assets/... \
-    # So we need to strip /backoffice prefix and serve from /assets/ \
+    # Handle JavaScript modules in /backoffice/assets/ (must be before general assets location) \
+    location ~ ^/backoffice/assets/(.+\.(js|mjs))$ { \
+        alias /usr/share/nginx/html/assets/$1; \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+        add_header Content-Type "application/javascript" always; \
+        access_log off; \
+    } \
+    \
+    # Handle CSS files in /backoffice/assets/ \
+    location ~ ^/backoffice/assets/(.+\.css)$ { \
+        alias /usr/share/nginx/html/assets/$1; \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+        add_header Content-Type "text/css" always; \
+        access_log off; \
+    } \
+    \
+    # Handle other static assets in /backoffice/assets/ \
     location /backoffice/assets/ { \
         alias /usr/share/nginx/html/assets/; \
         expires 1y; \
@@ -71,6 +87,7 @@ RUN echo 'server { \
         alias /usr/share/nginx/html/$1; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
+        add_header Content-Type "text/css" always; \
     } \
     \
     # Handle JS/TSX files with /backoffice prefix \
@@ -80,6 +97,7 @@ RUN echo 'server { \
         alias /usr/share/nginx/html/$1; \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
+        add_header Content-Type "application/javascript" always; \
     } \
     \
     # Handle other static files referenced with /backoffice prefix \
