@@ -41,21 +41,53 @@ RUN echo 'server { \
     \
     # Set the root for all requests
     root /usr/share/nginx/html; \
+    index index.html; \
     \
-    # Handle static assets with high priority
-    # Requests for /backoffice/assets/... will be served from /usr/share/nginx/html/assets/...
-    location /backoffice/assets { \
-        # No special handling needed, will use the global root
-        # Add aggressive caching for assets
-        add_header Cache-Control "public, max-age=31536000, immutable"; \
+    # Gzip compression \
+    gzip on; \
+    gzip_vary on; \
+    gzip_min_length 1024; \
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/json application/javascript; \
+    \
+    # Handle static assets (JS, CSS, images, fonts) \
+    # Vite builds assets in /assets/ but HTML references them as /backoffice/assets/... \
+    # So we need to strip /backoffice prefix and serve from /assets/ \
+    location /backoffice/assets/ { \
+        alias /usr/share/nginx/html/assets/; \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+        access_log off; \
     } \
     \
-    # Handle the SPA routing for any other /backoffice/ request
+    # Handle other static files referenced with /backoffice prefix \
+    # e.g., /backoffice/index.css, /backoffice/index.tsx \
+    location ~ ^/backoffice/(.+\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|tsx))$ { \
+        alias /usr/share/nginx/html/$1; \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+    } \
+    \
+    # Handle absolute paths that might still exist in HTML (fallback) \
+    # e.g., /index.css, /index.tsx (if Vite did not convert them) \
+    location ~ ^/(index\.(css|tsx|js)|assets/.+)$ { \
+        try_files $uri =404; \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+    } \
+    \
+    # Handle the SPA routing for /backoffice/ \
+    # Vite build creates index.html at root (/usr/share/nginx/html/index.html) \
+    # HTML has paths like /backoffice/assets/... which will be handled above \
     location /backoffice/ { \
         try_files $uri $uri/ /index.html; \
     } \
     \
-    # Redirect root requests to the /backoffice/ sub-path
+    # Handle /backoffice without trailing slash \
+    location = /backoffice { \
+        return 301 /backoffice/; \
+    } \
+    \
+    # Redirect root requests to the /backoffice/ sub-path \
     location = / { \
         return 301 /backoffice/; \
     } \
