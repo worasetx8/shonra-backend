@@ -23,19 +23,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # Build the application
-RUN npm run build && \
-    echo "=== Build Verification ===" && \
-    echo "Checking dist folder structure:" && \
-    ls -la dist/ && \
-    echo "" && \
-    echo "Checking assets folder:" && \
-    ls -la dist/assets/ 2>/dev/null || echo "⚠️ No assets folder found!" && \
-    echo "" && \
-    echo "=== HTML Content (first 30 lines) ===" && \
-    head -30 dist/index.html && \
-    echo "" && \
-    echo "=== Script Tags in HTML ===" && \
-    grep -i "script" dist/index.html || echo "⚠️ No script tags found!"
+RUN npm run build
 
 # Final stage: Nginx server to serve the built files
 FROM nginx:alpine
@@ -53,99 +41,25 @@ RUN echo 'server { \
     \
     # Set the root for all requests
     root /usr/share/nginx/html; \
-    index index.html; \
     \
-    # Gzip compression \
-    gzip on; \
-    gzip_vary on; \
-    gzip_min_length 1024; \
-    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/json application/javascript; \
-    \
-    # Set proper MIME types for JavaScript modules \
-    types { \
-        application/javascript js mjs; \
-        text/css css; \
-        text/html html htm; \
+    # Handle static assets with high priority
+    # Requests for /backoffice/assets/... will be served from /usr/share/nginx/html/assets/...
+    location /backoffice/assets { \
+    # No special handling needed, will use the global root
+    # Add aggressive caching for assets
+    add_header Cache-Control "public, max-age=31536000, immutable"; \
     } \
     \
-    # Handle JavaScript modules in /backoffice/assets/ (must be before general assets location) \
-    location ~ ^/backoffice/assets/(.+\.(js|mjs))$ { \
-        alias /usr/share/nginx/html/assets/$1; \
-        expires 1y; \
-        add_header Cache-Control "public, immutable"; \
-        add_header Content-Type "application/javascript" always; \
-        access_log off; \
-    } \
-    \
-    # Handle CSS files in /backoffice/assets/ \
-    location ~ ^/backoffice/assets/(.+\.css)$ { \
-        alias /usr/share/nginx/html/assets/$1; \
-        expires 1y; \
-        add_header Cache-Control "public, immutable"; \
-        add_header Content-Type "text/css" always; \
-        access_log off; \
-    } \
-    \
-    # Handle other static assets in /backoffice/assets/ \
-    location /backoffice/assets/ { \
-        alias /usr/share/nginx/html/assets/; \
-        expires 1y; \
-        add_header Cache-Control "public, immutable"; \
-        access_log off; \
-        # Disable directory listing \
-        autoindex off; \
-        # Return 404 if file not found instead of directory listing \
-        try_files $uri =404; \
-    } \
-    \
-    # Handle CSS files with /backoffice prefix \
-    location ~ ^/backoffice/(.+\.css)$ { \
-        alias /usr/share/nginx/html/$1; \
-        expires 1y; \
-        add_header Cache-Control "public, immutable"; \
-        add_header Content-Type "text/css" always; \
-    } \
-    \
-    # Handle JS/TSX files with /backoffice prefix \
-    # Note: Vite will convert ./index.tsx to /backoffice/assets/index-xxx.js when building \
-    # This location is a fallback in case the path was not converted \
-    location ~ ^/backoffice/(.+\.(js|mjs|tsx))$ { \
-        alias /usr/share/nginx/html/$1; \
-        expires 1y; \
-        add_header Cache-Control "public, immutable"; \
-        add_header Content-Type "application/javascript" always; \
-    } \
-    \
-    # Handle other static files referenced with /backoffice prefix \
-    location ~ ^/backoffice/(.+\.(png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot))$ { \
-        alias /usr/share/nginx/html/$1; \
-        expires 1y; \
-        add_header Cache-Control "public, immutable"; \
-    } \
-    \
-    # Handle absolute paths at root (fallback for assets) \
-    location /assets/ { \
-        expires 1y; \
-        add_header Cache-Control "public, immutable"; \
-    } \
-    \
-    # Handle the SPA routing for /backoffice/ \
-    # Vite build creates index.html at root (/usr/share/nginx/html/index.html) \
-    # HTML has paths like /backoffice/assets/... which will be handled above \
+    # Handle the SPA routing for any other /backoffice/ request
     location /backoffice/ { \
-        try_files $uri $uri/ /index.html; \
+    try_files $uri $uri/ /index.html; \
     } \
     \
-    # Handle /backoffice without trailing slash \
-    location = /backoffice { \
-        return 301 /backoffice/; \
-    } \
-    \
-    # Redirect root requests to the /backoffice/ sub-path \
+    # Redirect root requests to the /backoffice/ sub-path
     location = / { \
-        return 301 /backoffice/; \
+    return 301 /backoffice/; \
     } \
-}' > /etc/nginx/conf.d/default.conf
+    }' > /etc/nginx/conf.d/default.conf
 
 # Expose port
 EXPOSE 5173

@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     VITE_API_URL: process.env.VITE_API_URL || loadEnv(mode, ".", "").VITE_API_URL,
     SERVER_URL: process.env.SERVER_URL || loadEnv(mode, ".", "").SERVER_URL,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY || loadEnv(mode, ".", "").GEMINI_API_KEY,
-    VITE_BASE_PATH: process.env.VITE_BASE_PATH || loadEnv(mode, ".", "").VITE_BASE_PATH || '/backoffice'
+    VITE_BASE_PATH: process.env.VITE_BASE_PATH || loadEnv(mode, ".", "").VITE_BASE_PATH || "/backoffice"
   };
 
   return {
@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       outDir: "dist",
-      sourcemap: process.env.NODE_ENV === "development" // Only enable source maps in development
+      sourcemap: true
     }
   };
 });
