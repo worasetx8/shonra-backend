@@ -42,22 +42,22 @@ RUN echo 'server { \
     # Set the root for all requests
     root /usr/share/nginx/html; \
     \
-    # Handle static assets with high priority
+    # Handle static assets with high priority - rewrite path to remove /backoffice prefix
     # Requests for /backoffice/assets/... will be served from /usr/share/nginx/html/assets/...
-    location /backoffice/assets { \
-    # No special handling needed, will use the global root
-    # Add aggressive caching for assets
-    add_header Cache-Control "public, max-age=31536000, immutable"; \
+    location /backoffice/assets/ { \
+        alias /usr/share/nginx/html/assets/; \
+        add_header Cache-Control "public, max-age=31536000, immutable"; \
+        try_files $uri =404; \
     } \
     \
     # Handle the SPA routing for any other /backoffice/ request
     location /backoffice/ { \
-    try_files $uri $uri/ /index.html; \
+        try_files $uri $uri/ /index.html; \
     } \
     \
     # Redirect root requests to the /backoffice/ sub-path
     location = / { \
-    return 301 /backoffice/; \
+        return 301 /backoffice/; \
     } \
     }' > /etc/nginx/conf.d/default.conf
 
