@@ -46,8 +46,7 @@ RUN echo 'server { \
     types { \
         text/html html htm; \
         text/css css; \
-        text/javascript js mjs; \
-        application/javascript js; \
+        application/javascript js mjs; \
         application/json json; \
         image/svg+xml svg; \
         image/png png; \
