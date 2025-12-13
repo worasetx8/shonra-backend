@@ -46,7 +46,7 @@ export const Sidebar: React.FC<SidebarProps & { user?: any }> = ({ currentView, 
       try {
         const response = await apiService.getSettings();
         if (response.success) {
-          const logoUrl = response.data.logo_url;
+          const logoUrl = response.data.logo_backend_url;
           // Convert relative path to full URL if needed
           const fullLogoUrl = logoUrl && !logoUrl.startsWith('http') 
             ? `${import.meta.env.VITE_API_URL || import.meta.env.SERVER_URL || 'http://localhost:3002'}${logoUrl}`

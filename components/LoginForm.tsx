@@ -15,7 +15,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
   
   const [settings, setSettings] = useState({
     website_name: 'Shonra Admin',
-    logo_url: ''
+    logo_backend_url: ''
   });
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         if (response.success) {
           setSettings({
             website_name: response.data.website_name || 'Shonra Admin',
-            logo_url: response.data.logo_backend_url || response.data.logo_url || ''
+            logo_backend_url: response.data.logo_backend_url || ''
           });
         }
       } catch (e) {
@@ -64,12 +64,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       <div className="w-full max-w-md">
         {/* Logo/Header */}
         <div className="text-center mb-8">
-          {settings.logo_url ? (
+          {settings.logo_backend_url ? (
             <div className="inline-flex items-center justify-center w-24 h-24 mb-4">
               <img 
-                src={settings.logo_url.startsWith('http') 
-                  ? settings.logo_url 
-                  : `${import.meta.env.VITE_API_URL || import.meta.env.SERVER_URL || 'http://localhost:3002'}${settings.logo_url}`} 
+                src={settings.logo_backend_url.startsWith('http') 
+                  ? settings.logo_backend_url 
+                  : `${import.meta.env.VITE_API_URL || import.meta.env.SERVER_URL || 'http://localhost:3002'}${settings.logo_backend_url}`} 
                 alt="Logo" 
                 className="w-full h-full object-contain" 
                 onError={(e) => {
