@@ -42,11 +42,36 @@ RUN echo 'server { \
     # Set the root for all requests
     root /usr/share/nginx/html; \
     \
+    # Add MIME types
+    types { \
+        text/html html htm; \
+        text/css css; \
+        text/javascript js mjs; \
+        application/javascript js; \
+        application/json json; \
+        image/svg+xml svg; \
+        image/png png; \
+        image/jpeg jpg jpeg; \
+        image/gif gif; \
+        image/webp webp; \
+        font/woff woff; \
+        font/woff2 woff2; \
+        font/ttf ttf; \
+        font/otf otf; \
+    } \
+    default_type application/octet-stream; \
+    \
     # Handle static assets with high priority - rewrite path to remove /backoffice prefix
     # Requests for /backoffice/assets/... will be served from /usr/share/nginx/html/assets/...
     location /backoffice/assets/ { \
         alias /usr/share/nginx/html/assets/; \
         add_header Cache-Control "public, max-age=31536000, immutable"; \
+        try_files $uri =404; \
+    } \
+    \
+    # Handle /backoffice/vite.svg or other static files in root
+    location ~ ^/backoffice/[^/]+\\.(svg|png|jpg|jpeg|gif|ico|webp)$ { \
+        rewrite ^/backoffice/(.*)$ /$1 break; \
         try_files $uri =404; \
     } \
     \
